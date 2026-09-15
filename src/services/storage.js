@@ -2,7 +2,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = '@citas_medicas';
 
-// Datos de prueba
 const datosDePrueba = [
   {
     id: '1',
@@ -12,6 +11,7 @@ const datosDePrueba = [
     hora: '10:40',
     completada: false,
     createdAt: Date.now(),
+    updatedAt: Date.now(),
   },
   {
     id: '2',
@@ -21,6 +21,7 @@ const datosDePrueba = [
     hora: '10:40',
     completada: false,
     createdAt: Date.now() - 1000,
+    updatedAt: Date.now() - 1000,
   },
   {
     id: '3',
@@ -30,6 +31,7 @@ const datosDePrueba = [
     hora: '15:40',
     completada: false,
     createdAt: Date.now() - 2000,
+    updatedAt: Date.now() - 2000,
   },
   {
     id: '4',
@@ -39,6 +41,7 @@ const datosDePrueba = [
     hora: '13:00',
     completada: false,
     createdAt: Date.now() - 3000,
+    updatedAt: Date.now() - 3000,
   },
   {
     id: '5',
@@ -48,6 +51,7 @@ const datosDePrueba = [
     hora: '09:00',
     completada: true,
     createdAt: Date.now() - 4000,
+    updatedAt: Date.now() - 4000,
   },
   {
     id: '6',
@@ -57,6 +61,7 @@ const datosDePrueba = [
     hora: '11:30',
     completada: true,
     createdAt: Date.now() - 5000,
+    updatedAt: Date.now() - 5000,
   },
 ];
 
@@ -78,7 +83,9 @@ export async function saveCitas(citas) {
 
 export async function addCita(cita) {
   const citas = await getCitas();
-  citas.push(cita);
+  const now = Date.now();
+  const nueva = { ...cita, createdAt: cita.createdAt || now, updatedAt: now };
+  citas.push(nueva);
   await saveCitas(citas);
   return citas;
 }
@@ -87,7 +94,7 @@ export async function updateCita(id, updates) {
   const citas = await getCitas();
   const index = citas.findIndex((c) => c.id === id);
   if (index !== -1) {
-    citas[index] = { ...citas[index], ...updates };
+    citas[index] = { ...citas[index], ...updates, updatedAt: Date.now() };
     await saveCitas(citas);
   }
   return citas;
@@ -98,4 +105,4 @@ export async function deleteCita(id) {
   const filtradas = citas.filter((c) => c.id !== id);
   await saveCitas(filtradas);
   return filtradas;
-}
+} 

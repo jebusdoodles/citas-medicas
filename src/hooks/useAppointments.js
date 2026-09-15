@@ -6,7 +6,6 @@ export function useAppointments() {
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Carga inicial
   useEffect(() => {
     async function cargar() {
       await initStorage();
@@ -17,7 +16,6 @@ export function useAppointments() {
     cargar();
   }, []);
 
-  // Guardar cambios en AsyncStorage cada vez que citas cambie
   useEffect(() => {
     if (!loading) {
       saveCitas(citas);
@@ -39,13 +37,19 @@ export function useAppointments() {
   const sugerenciasTitulos = getSugerencias(citas, 'title');
 
   const addCita = useCallback((cita) => {
-    const nueva = { ...cita, id: Date.now().toString(), createdAt: Date.now() };
+    const now = Date.now();
+    const nueva = {
+      ...cita,
+      id: Date.now().toString(),
+      createdAt: now,
+      updatedAt: now,
+    };
     setCitas((prev) => [...prev, nueva]);
   }, []);
 
   const updateCita = useCallback((id, updates) => {
     setCitas((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updates } : c))
+      prev.map((c) => (c.id === id ? { ...c, ...updates, updatedAt: Date.now() } : c))
     );
   }, []);
 

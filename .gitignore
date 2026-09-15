@@ -42,3 +42,4 @@ yarn-error.*
 
 #personal
 src/config/firebase.js
+src/services/firebaseRest.js

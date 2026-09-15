@@ -22,7 +22,7 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <PrimaryButton 
         title="Añadir Cita" 
-        onPress={() => router.push('/modal/add-edit')} 
+        onPress={() => router.push('/add-edit')} 
       />
 
       {!hayCitas ? (
@@ -49,7 +49,7 @@ export default function HomeScreen() {
                   fecha={cita.fecha}
                   hora={cita.hora}
                   onPress={() => router.push({
-                    pathname: '/modal/add-edit',
+                    pathname: '/add-edit',
                     params: { id: cita.id }
                   })}
                 />
