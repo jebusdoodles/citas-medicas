@@ -1,12 +1,12 @@
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAppointments } from '../../src/hooks/useAppointments';
+import { useAppointmentsContext } from '../../src/context/AppointmentsContext';
 import AppointmentCard from '../../src/components/AppointmentCard';
 import PrimaryButton from '../../src/components/PrimaryButton';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { gruposPendientes, loading } = useAppointments();
+  const { gruposPendientes, loading } = useAppointmentsContext();
 
   if (loading) {
     return (

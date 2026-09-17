@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-import { useAppointments } from '../../src/hooks/useAppointments';
+import { useAppointmentsContext } from '../../src/context/AppointmentsContext';
 import AppointmentCard from '../../src/components/AppointmentCard';
 
 export default function HistoryScreen() {
-  const { gruposCompletadas, loading } = useAppointments();
+  const { gruposCompletadas, loading } = useAppointmentsContext();
 
   if (loading) {
     return (

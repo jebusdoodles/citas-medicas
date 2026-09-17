@@ -1,13 +1,23 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useAppointmentsContext } from '../src/context/AppointmentsContext';
 
 export default function AddEditModal() {
   const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const { getCitaById } = useAppointmentsContext();
+
+  const cita = id ? getCitaById(id) : null;
+  const isEditing = Boolean(cita);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>AddEditModal</Text>
-      <Text style={styles.subtitle}>Placeholder - Paso 1</Text>
+      <Text style={styles.title}>{isEditing ? 'Editar Cita' : 'Nueva Cita'}</Text>
+      {isEditing && (
+        <Text style={styles.subtitle}>ID: {cita.id}</Text>
+      )}
+      <Text style={styles.subtitle}>Doctor: {cita?.name_doctor || 'Nuevo'}</Text>
+      <Text style={styles.subtitle}>Título: {cita?.title || 'Nuevo'}</Text>
       
       <Pressable style={styles.closeButton} onPress={() => router.back()}>
         <Text style={styles.closeText}>Cerrar Modal</Text>
@@ -33,9 +43,10 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: '#787676',
-    marginBottom: 24,
+    marginBottom: 4,
   },
   closeButton: {
+    marginTop: 24,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 16,
