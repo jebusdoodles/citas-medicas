@@ -1,4 +1,4 @@
-// Parsea "dd/mm/aa" o "dd/mm/aaaa" a objeto Date
+// Parsea "dd/mm/aa" + "hh:mm" a objeto Date
 export function parseFecha(fechaStr, horaStr) {
   const [dia, mes, anio] = fechaStr.split('/');
   const [hora, minuto] = horaStr.split(':');
@@ -58,4 +58,29 @@ export function agruparPorMesAnio(citas) {
 export function getSugerencias(citas, campo) {
   const valores = citas.map((c) => c[campo]).filter(Boolean);
   return [...new Set(valores)];
+}
+
+// Date -> "dd/mm/aa"
+export function formatDateToString(date) {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = String(date.getFullYear()).slice(-2);
+  return `${d}/${m}/${y}`;
+}
+
+// Date -> "hh:mm"
+export function formatTimeToString(date) {
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${h}:${min}`;
+}
+
+// Verifica si una fecha "dd/mm/aa" es anterior a hoy
+export function isFechaPasada(fechaStr) {
+  const [dia, mes, anio] = fechaStr.split('/');
+  const yearFull = anio.length === 2 ? `20${anio}` : anio;
+  const fechaCita = new Date(parseInt(yearFull), parseInt(mes) - 1, parseInt(dia));
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return fechaCita < hoy;
 }
