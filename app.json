@@ -14,7 +14,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jebusdoodles.citasmedicas"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -22,6 +23,12 @@
     "plugins": [
       "expo-router",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cfacab5d-2b4b-4b67-bf3e-09388ac547eb"
+      }
+    }
   }
 }
