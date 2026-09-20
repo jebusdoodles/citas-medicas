@@ -1,8 +1,10 @@
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useAppointmentsContext } from '../../src/context/AppointmentsContext';
 import AppointmentCard from '../../src/components/AppointmentCard';
 
 export default function HistoryScreen() {
+  const router = useRouter();
   const { gruposCompletadas, loading } = useAppointmentsContext();
 
   if (loading) {
@@ -42,7 +44,10 @@ export default function HistoryScreen() {
                   name_doctor={cita.name_doctor}
                   fecha={cita.fecha}
                   hora={cita.hora}
-                  onPress={() => {}}
+                  onPress={() => router.push({
+                    pathname: '/add-edit',
+                    params: { id: cita.id }
+                  })}
                 />
               ))}
             </View>

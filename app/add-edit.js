@@ -38,8 +38,12 @@ export default function AddEditModal() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [fechaError, setFechaError] = useState(false);
+  const [titleError, setTitleError] = useState(false);
+  const [doctorError, setDoctorError] = useState(false);
+  const [horaError, setHoraError] = useState(false);
   const [showTitleSuggestions, setShowTitleSuggestions] = useState(false);
   const [showDoctorSuggestions, setShowDoctorSuggestions] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // Load existing data
   useEffect(() => {
@@ -60,7 +64,7 @@ export default function AddEditModal() {
     (d) => d.toLowerCase().includes(nameDoctor.toLowerCase()) && d !== nameDoctor && nameDoctor.length > 0
   );
 
-  const isFormValid = title.trim() && nameDoctor.trim() && fecha && hora && !fechaError;
+  const isFormValid = title.trim() && nameDoctor.trim() && fecha && hora && !fechaError && !titleError && !doctorError && !horaError;
 
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
@@ -75,14 +79,50 @@ export default function AddEditModal() {
     setShowTimePicker(false);
     if (selectedDate) {
       setHora(formatTimeToString(selectedDate));
+      setHoraError(false);
     }
   };
 
-  const validateAndSave = () => {
-    if (!title.trim() || !nameDoctor.trim() || !fecha || !hora) return;
+  const validateForm = () => {
+    let isValid = true;
 
-    if (isFechaPasada(fecha)) {
+    if (!title.trim()) {
+      setTitleError(true);
+      isValid = false;
+    } else {
+      setTitleError(false);
+    }
+
+    if (!nameDoctor.trim()) {
+      setDoctorError(true);
+      isValid = false;
+    } else {
+      setDoctorError(false);
+    }
+
+    if (!fecha) {
       setFechaError(true);
+      isValid = false;
+    } else if (isFechaPasada(fecha)) {
+      setFechaError(true);
+      isValid = false;
+    } else {
+      setFechaError(false);
+    }
+
+    if (!hora) {
+      setHoraError(true);
+      isValid = false;
+    } else {
+      setHoraError(false);
+    }
+
+    return isValid;
+  };
+
+  const validateAndSave = () => {
+    if (!validateForm()) {
+      Alert.alert('Campos incompletos', 'Por favor completa todos los campos correctamente.');
       return;
     }
 
@@ -97,20 +137,30 @@ export default function AddEditModal() {
   };
 
   const performSave = () => {
-    const payload = {
-      title: title.trim(),
-      name_doctor: nameDoctor.trim(),
-      fecha,
-      hora,
-      completada,
-    };
+    setSaving(true);
 
-    if (isEditing) {
-      updateCita(cita.id, payload);
-    } else {
-      addCita({ ...payload, completada: false });
+    try {
+      const payload = {
+        title: title.trim(),
+        name_doctor: nameDoctor.trim(),
+        fecha,
+        hora,
+        completada,
+      };
+
+      if (isEditing) {
+        updateCita(cita.id, payload);
+      } else {
+        addCita({ ...payload, completada: false });
+      }
+
+      router.back();
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      Alert.alert('Error', 'No se pudo guardar la cita. Intenta de nuevo.');
+    } finally {
+      setSaving(false);
     }
-    router.back();
   };
 
   const handleDelete = () => {
@@ -153,6 +203,7 @@ export default function AddEditModal() {
     >
       <View style={styles.header}>
         <Text style={styles.headerTitle}>{isEditing ? 'Editar Cita' : 'Nueva Cita'}</Text>
+
         {isEditing && (
           <Pressable onPress={handleDelete} style={styles.trashButton}>
             <Text style={styles.trashIcon}>🗑</Text>
@@ -169,16 +220,22 @@ export default function AddEditModal() {
         <View style={styles.field}>
           <Text style={styles.label}>Título</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, titleError && styles.inputError]}
             placeholder="Ingresa título"
             placeholderTextColor="#787676"
             value={title}
             onChangeText={(text) => {
               setTitle(text);
+              setTitleError(false);
               setShowTitleSuggestions(true);
             }}
             onBlur={() => setTimeout(() => setShowTitleSuggestions(false), 200)}
           />
+
+          {titleError && (
+            <Text style={styles.errorText}>El título es obligatorio</Text>
+          )}
+
           {showTitleSuggestions && filteredTitles.length > 0 && (
             <View style={styles.suggestions}>
               {filteredTitles.slice(0, 3).map((item) => (
@@ -188,6 +245,7 @@ export default function AddEditModal() {
                   onPress={() => {
                     setTitle(item);
                     setShowTitleSuggestions(false);
+                    setTitleError(false);
                   }}
                 >
                   <Text style={styles.suggestionText}>{item}</Text>
@@ -201,16 +259,22 @@ export default function AddEditModal() {
         <View style={styles.field}>
           <Text style={styles.label}>Nombre del Doctor</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, doctorError && styles.inputError]}
             placeholder="dr alberto ramírez vázquez"
             placeholderTextColor="#787676"
             value={nameDoctor}
             onChangeText={(text) => {
               setNameDoctor(text);
+              setDoctorError(false);
               setShowDoctorSuggestions(true);
             }}
             onBlur={() => setTimeout(() => setShowDoctorSuggestions(false), 200)}
           />
+
+          {doctorError && (
+            <Text style={styles.errorText}>El nombre del doctor es obligatorio</Text>
+          )}
+
           {showDoctorSuggestions && filteredDoctors.length > 0 && (
             <View style={styles.suggestions}>
               {filteredDoctors.slice(0, 3).map((item) => (
@@ -220,6 +284,7 @@ export default function AddEditModal() {
                   onPress={() => {
                     setNameDoctor(item);
                     setShowDoctorSuggestions(false);
+                    setDoctorError(false);
                   }}
                 >
                   <Text style={styles.suggestionText}>{item}</Text>
@@ -241,18 +306,26 @@ export default function AddEditModal() {
                 {fecha || 'dd/mm/aa'}
               </Text>
             </Pressable>
+            {fechaError && (
+              <Text style={styles.errorText}>
+                {fecha ? 'La fecha no puede ser pasada' : 'La fecha es obligatoria'}
+              </Text>
+            )}
           </View>
 
           <View style={[styles.field, styles.half]}>
             <Text style={styles.label}>Hora</Text>
             <Pressable
               onPress={() => setShowTimePicker(true)}
-              style={[styles.input, styles.inputPressable]}
+              style={[styles.input, styles.inputPressable, horaError && styles.inputError]}
             >
               <Text style={hora ? styles.inputText : styles.placeholder}>
                 {hora || 'hh:mm'}
               </Text>
             </Pressable>
+            {horaError && (
+              <Text style={styles.errorText}>La hora es obligatoria</Text>
+            )}
           </View>
         </View>
 
@@ -275,7 +348,7 @@ export default function AddEditModal() {
           <PrimaryButton
             title={isEditing ? 'Guardar cambios' : 'Añadir Cita'}
             onPress={validateAndSave}
-            disabled={!isFormValid}
+            disabled={!isFormValid || saving}
           />
         </View>
       </ScrollView>
@@ -368,6 +441,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1.5,
     borderColor: '#FF383C',
+  },
+  errorText: {
+    color: '#FF383C',
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: '600',
   },
   row: {
     flexDirection: 'row',

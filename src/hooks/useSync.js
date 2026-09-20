@@ -5,16 +5,18 @@ import { fetchAllCitas, createCitaRemote, updateCitaRemote, deleteCitaRemote } f
 
 export function useSync() {
   const [syncing, setSyncing] = useState(false);
+  const [lastSyncError, setLastSyncError] = useState(null);
+  const [lastSyncTime, setLastSyncTime] = useState(null);
 
   const sync = useCallback(async () => {
     try {
-      // Espera a que auth esté listo
       if (!auth.currentUser) {
         console.log('[SYNC] Auth no listo, saltando...');
         return;
       }
 
       setSyncing(true);
+      setLastSyncError(null);
       console.log('[SYNC] Iniciando sincronización...');
 
       const localCitas = await getCitas();
@@ -26,6 +28,7 @@ export function useSync() {
         console.log('[SYNC] Citas remotas:', remoteCitas.length);
       } catch (err) {
         console.log('[SYNC] No se pudieron descargar citas remotas:', err.message);
+        setLastSyncError('No se pudo conectar con Firebase. Tus cambios se guardaron localmente.');
         setSyncing(false);
         return;
       }
@@ -50,40 +53,57 @@ export function useSync() {
       }
 
       // Subir locales que no existen en remoto o son más recientes
+      let uploadErrors = 0;
       for (const local of localCitas) {
         const remote = remoteMap.get(local.id);
-        if (!remote) {
-          console.log('[SYNC] Subiendo cita nueva:', local.id);
-          await createCitaRemote(local);
-        } else if (local.updatedAt > remote.updatedAt) {
-          console.log('[SYNC] Actualizando cita:', local.id);
-          await updateCitaRemote(local);
+        try {
+          if (!remote) {
+            console.log('[SYNC] Subiendo cita nueva:', local.id);
+            await createCitaRemote(local);
+          } else if (local.updatedAt > remote.updatedAt) {
+            console.log('[SYNC] Actualizando cita:', local.id);
+            await updateCitaRemote(local);
+          }
+        } catch (err) {
+          console.error('[SYNC] Error al subir cita:', local.id, err.message);
+          uploadErrors++;
         }
       }
 
       // Eliminar en remoto las que ya no existen localmente
       for (const remote of remoteCitas) {
         if (!localMap.has(remote.id)) {
-          console.log('[SYNC] Eliminando cita remota:', remote.id);
-          await deleteCitaRemote(remote.id);
+          try {
+            console.log('[SYNC] Eliminando cita remota:', remote.id);
+            await deleteCitaRemote(remote.id);
+          } catch (err) {
+            console.error('[SYNC] Error al eliminar cita remota:', remote.id, err.message);
+            uploadErrors++;
+          }
         }
       }
 
       await saveCitas(merged);
       console.log('[SYNC] Completada. Total:', merged.length);
+      
+      if (uploadErrors > 0) {
+        setLastSyncError(`${uploadErrors} cita(s) no se pudieron sincronizar. Se reintentará automáticamente.`);
+      } else {
+        setLastSyncTime(new Date());
+      }
+
     } catch (err) {
       console.error('[SYNC] Error general:', err.message);
+      setLastSyncError('Error de sincronización. Tus datos están seguros localmente.');
     } finally {
       setSyncing(false);
     }
   }, []);
 
   useEffect(() => {
-    // Espera a que el auth anónimo esté listo
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         console.log('[AUTH] Usuario listo:', user.uid);
-        // Espera 1s para asegurar que el token es válido
         setTimeout(() => sync(), 1000);
       }
     });
@@ -91,5 +111,5 @@ export function useSync() {
     return () => unsubscribe();
   }, [sync]);
 
-  return { syncing, sync };
+  return { syncing, sync, lastSyncError, lastSyncTime };
 }
