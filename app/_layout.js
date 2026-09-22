@@ -3,10 +3,17 @@ import { AppointmentsProvider } from '../src/context/AppointmentsContext';
 import { useAuth } from '../src/hooks/useAuth';
 import { useSync } from '../src/hooks/useSync';
 import { View, Text, ActivityIndicator, Pressable, StyleSheet } from 'react-native';
+import * as SplashScreen from 'expo-splash-screen';
 
 export default function RootLayout() {
   const { user, loading: authLoading } = useAuth();
   const { syncing, sync, lastSyncError } = useSync();
+
+  SplashScreen.setOptions({
+    duration: 1000,
+    fade: true,
+  });
+
 
   if (authLoading) {
     return (

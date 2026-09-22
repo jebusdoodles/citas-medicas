@@ -13,7 +13,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#F4F8F9"
       },
       "package": "com.jebusdoodles.citasmedicas"
     },
@@ -22,7 +22,15 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-splash-screen",
+          {
+            "backgroundColor": "#F4F8F9",
+            "image": "./assets/adaptive-icon.png",
+            "imageWidth": 200
+          }
+      ]
     ],
     "extra": {
       "router": {},
