@@ -84,3 +84,17 @@ export function isFechaPasada(fechaStr) {
   hoy.setHours(0, 0, 0, 0);
   return fechaCita < hoy;
 }
+
+export function getDiaSemana(fechaStr) {
+  const [dia, mes, anio] = fechaStr.split('/');
+  const yearFull = anio.length === 2 ? `20${anio}` : anio;
+  const fecha = new Date(parseInt(yearFull), parseInt(mes) - 1, parseInt(dia));
+  const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  return dias[fecha.getDay()];
+}
+
+// Devuelve el día del mes como string, ej: "20"
+export function getDiaMes(fechaStr) {
+  const [dia] = fechaStr.split('/');
+  return dia;
+}

@@ -53,7 +53,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 44,
     left: 0,
     right: 0,
     alignItems: 'center',
